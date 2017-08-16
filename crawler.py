@@ -8,7 +8,6 @@ import time,datetime
 #sys.setdefaultencoding('utf8')
 jira = JIRA('http://132.37.3.100:9090', basic_auth=('chengli','123456'))
 
-
 appkey = "563d9910adfc08142399f0e5497cc482"                                 #笑话用接口
 project = 'ZHAOPIN'                                                         # 项目名
 Group = ["yunfengli", "haokan", "laocj", "daliangliang", "yunliu", "xinyili", "chunyanzhao", "dailinshi", "chengli","xiaoxiaomo"]
