@@ -22,7 +22,8 @@ def Run_Task(project):
         k = 0
         iss = jira.search_issues('project = '+project+' AND status in (待处理, Reopened, "in progress") AND assignee in (' + Group[i] + ") ORDER BY summary ASC")
         for j in iss:
-            Email_Address[i] = j.fields.assignee.emailAddress
+            if (Email_Address[i] != 0):
+                Email_Address[i] = j.fields.assignee.emailAddress
 
     for i in range(len(Group)):
         if (Email_Address[i] != 0):
