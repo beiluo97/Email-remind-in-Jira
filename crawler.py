@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#python 3.6.0
 from jira import JIRA
 import smtplib,sys
 import  json,urllib
