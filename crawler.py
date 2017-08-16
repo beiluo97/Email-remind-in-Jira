@@ -6,11 +6,11 @@ import  json,urllib
 import time,datetime
 #reload(sys)                     #python 2.7.x情况下需要 Python3 环境下不需要再用
 #sys.setdefaultencoding('utf8')
-jira = JIRA('http://132.37.3.100:9090', basic_auth=('chengli','123456'))
+jira = JIRA('http://132.37.3.100:9090', basic_auth=('usrer','123456'))#须修改
 
 appkey = "563d9910adfc08142399f0e5497cc482"                                 #笑话用接口
 project = 'ZHAOPIN'                                                         # 项目名
-Group = ["yunfengli", "haokan", "laocj", "daliangliang", "yunliu", "xinyili", "chunyanzhao", "dailinshi", "chengli","xiaoxiaomo"]
+Group = ["xx","xx","xx"]                                                    #这里是jql下的检索名字信息
 
 Email_Address = [0 for i in range(len(Group))]                              #INIT这里是人数
 Sleep_Time = 600                                                            #休眠时间
@@ -155,11 +155,9 @@ def Send_Email(Name):
                 """
     EmailAddress = j.fields.assignee.emailAddress
 
-    # EmailAddress = "529599524@qq.com"
     print(EmailAddress)
-
-    _user = "18607880513@163.com"
-    _pwd = "dx2017erp!"
+    _user = "xxx@xx.com"
+    _pwd = "xxx"
     _to = EmailAddress
     smtpserver = 'smtp.163.com'
     msg = MIMEMultipart('alternative')
