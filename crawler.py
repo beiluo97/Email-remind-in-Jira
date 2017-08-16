@@ -157,8 +157,8 @@ def Send_Email(Name):
     EmailAddress = j.fields.assignee.emailAddress
 
     print(EmailAddress)
-    _user = "xxx@xx.com"
-    _pwd = "xxx"
+    _user = "xxx@xx.com" #发送人邮箱
+    _pwd = "xxx"        #发送人邮箱地址
     _to = EmailAddress
     smtpserver = 'smtp.163.com'
     msg = MIMEMultipart('alternative')
