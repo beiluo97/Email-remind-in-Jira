@@ -1,36 +1,37 @@
 # -*- coding: utf-8 -*-
-#python 3.6.0
+#V1.3版本，更加智能化，更好的基于jira所提供的api进行自动化提醒，可移植性更强,Project参数不需要了
+
 from jira import JIRA
 import smtplib,sys
 import  json,urllib
-import time,datetime
-#reload(sys)                     #python 2.7.x情况下需要 Python3 环境下不需要再用
-#sys.setdefaultencoding('utf8')
-jira = JIRA('http://132.37.3.100:9090', basic_auth=('usrer','123456'))#须修改
+import time,datetime,random
+
+jira = JIRA('JIRA网址', basic_auth=('usr','password'))
+
 
 appkey = "563d9910adfc08142399f0e5497cc482"                                 #笑话用接口
-project = 'ZHAOPIN'                                                         # 项目名
-Group = ["xx","xx","xx"]                                                    #这里是jql下的检索名字信息
-
+                                                                            # 项目名
+Group = JIRA.group_members(jira,"ERP")
+Groups = sorted(Group.items())                                              #将字典转为元组形式访问，字典无法直接调用第某个参数
 Email_Address = [0 for i in range(len(Group))]                              #INIT这里是人数
 Sleep_Time = 600                                                            #休眠时间
 
-def Run_Task(project):
+def Run_Task():
     title = "今日提醒"+time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
     print(title)
     for i in range(len(Group)):
         k = 0
-        iss = jira.search_issues('project = '+project+' AND status in (待处理, Reopened, "in progress") AND assignee in (' + Group[i] + ") ORDER BY summary ASC")
+        iss = jira.search_issues('status in (待处理, Reopened, "in progress") AND assignee in ('+Groups[i][0]+")" )
         for j in iss:
-            if (Email_Address[i] != 0):
+            if(Email_Address[i] == 0):
                 Email_Address[i] = j.fields.assignee.emailAddress
 
     for i in range(len(Group)):
         if (Email_Address[i] != 0):
             try:
-                Send_Email(Group[i])
-            except   Exception as e:
-                print (e,"发送到"+Group[i]+"的邮件发送失败！")
+                Send_Email(Groups[i][0])
+            except  Exception as e:
+                print (e,"发送到"+Groups[i][0]+"的邮件发送失败！")
 
 def Daily_Project_High():
     flag = False
@@ -55,17 +56,17 @@ def Daily_Project_High():
         time.sleep(Sleep_Time)
         after_sleep = datetime.datetime.now()
         if (before_sleep - fst_remind).total_seconds() <= 0 and (after_sleep - fst_remind).total_seconds() >= 0:
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - snd_remind).total_seconds() <= 0 and (after_sleep - snd_remind).total_seconds() >= 0:
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - trd_remind).total_seconds() <= 0 and (after_sleep - trd_remind).total_seconds() >= 0:
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - fth_remind).total_seconds() <= 0 and (after_sleep - fth_remind).total_seconds() >= 0:
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - sth_remind).total_seconds() <= 0 and (after_sleep - sth_remind).total_seconds() >= 0:
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - sev_remind).total_seconds() <= 0 and (after_sleep - sev_remind).total_seconds() >= 0:
-            Run_Task(project)
+            Run_Task()
         if datetime.datetime.isoweekday(datetime.datetime.now()) >5:
             time.sleep(86400)                   #检测到此时是周六 自动休眠两天
 
@@ -92,16 +93,16 @@ def Daily_Project_Low():
         time.sleep(Sleep_Time)
         after_sleep = datetime.datetime.now()
         if (before_sleep - fst_remind).total_seconds() <= 0 and (after_sleep - fst_remind).total_seconds() >= 0:  # 8:40
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - trd_remind).total_seconds() <= 0 and (
             after_sleep - trd_remind).total_seconds() >= 0:  # 11:30
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - fth_remind).total_seconds() <= 0 and (
             after_sleep - fth_remind).total_seconds() >= 0:  # 14:10
-            Run_Task(project)
+            Run_Task()
         elif (before_sleep - sev_remind).total_seconds() <= 0 and (
             after_sleep - sev_remind).total_seconds() >= 0:  # 17:30
-            Run_Task(project)
+            Run_Task()
         if datetime.datetime.isoweekday(datetime.datetime.now()) >5:
             time.sleep(86400)                   #检测到此时是周末 自动休眠两天
 
@@ -109,7 +110,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 def Send_Email(Name):
-    iss = jira.search_issues('project = ' + project + ' AND status in (待处理, Reopened, "in progress") AND assignee in (' + Name + ') ORDER BY summary ASC')
+    iss = jira.search_issues('status in (待处理, Reopened, "in progress") AND assignee in (' + Name + ') ORDER BY summary ASC')
     k=0
     html =\
         """
@@ -118,9 +119,12 @@ def Send_Email(Name):
                 <style>
                     table {
                             border-radius: 5px 5px 3px 2px / 5px 5px 1px 3px;
+                            
                         }
+                        
+                    table th,table td { font-size:11px; }
                 </style>
-                <table id="issuetable" valign= "top" border=1 cellspacing=0>
+                <table  id="issuetable" valign= "top" border=1 cellspacing=0>
                     <tr>
                         <th>关键字</th>
                         <th>主题</th>
@@ -140,7 +144,7 @@ def Send_Email(Name):
                       <td align = "center"><a href="http://132.37.3.100:9090/browse/"""+j.key+"""">"""+j.fields.summary+"""</a></td>
                       <td align="center">"""+j.fields.creator.displayName+"""</td>
                       <td align="center">"""+j.fields.assignee.displayName+"""</td>
-                      <td align="center"><img src="""+j.fields.priority.iconUrl+""" height="14" width="14" border="0" ></td>
+                      <td align="center">"""+j.fields.priority.name+""" </td>
                       <td>"""+j.fields.status.name+"""</td>
                       <td>"""+j.fields.created[0:10]+"""</td>
                       <td>"""+j.fields.updated[0:10]+"""</td>
@@ -150,20 +154,19 @@ def Send_Email(Name):
         html =html + htmltemp
     html += """
                 </table><HR style="FILTER: alpha(opacity=100,finishopacity=0,style=3)" width="100%" color=#987cb9 SIZE=3>
-                <em align = "center">高强度工作挺久了，休息一下，喝口水，走一走，看个笑话</em>
-                <br />"""+Joke(appkey,"GET")+"""
+                <em align = "center">高强度工作挺久了，休息一下，喝口水，走一走</em>
+                <div style="margin:10px auto"><img src="https://source.unsplash.com/random/800x600"></div>
                 </body></html>
                 """
     EmailAddress = j.fields.assignee.emailAddress
-
+        #<br />"""+Joke(appkey,"GET")+""
     print(EmailAddress)
-    _user = "xxx@xx.com" #发送人邮箱
-    _pwd = "xxx"        #发送人邮箱地址
+    _user = "usr"     #Email usrname like xxx@xx.com
+    _pwd = "password" 
     _to = EmailAddress
-    smtpserver = 'smtp.163.com'
+    smtpserver = 'smtp.163.com'   #smtpsever
     msg = MIMEMultipart('alternative')
-
-    msg["Subject"] = "你还有来自["+j.fields.project.name+']项目的'+ str(k) +'个未完成任务，请及时处理'
+    msg["Subject"] = j.fields.assignee.displayName+'，你还有'+ str(k) +'个未完成任务，请及时处理【】'
     msg["From"]    = _user
     msg["To"]      = _to
 
@@ -203,8 +206,7 @@ def Joke(Appkey,m = "GET"):
 
 if __name__ == '__main__':
 
-    project = 'ZHAOPIN' #项目名
-    Run_Task(project)
+#    Run_Task()
     if sys.argv[1] == "high":
         Daily_Project_High()
     else:
