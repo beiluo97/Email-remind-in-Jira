@@ -1,4 +1,4 @@
-# Email-remind-in-Jara
+# Email-remind-in-Jira
 python
 基于jira系统的邮件提醒工具！
 使用手册以及开发背景见：
